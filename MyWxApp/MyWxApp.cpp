@@ -1,7 +1,15 @@
-// MyWxApp.cpp : This file contains the 'main' function. Program execution begins and ends there.
-// For compilers that support precompilation, includes "wx/wx.h".
-#include <wx/wxprec.h>
+/*
+** Copyright (c) 2020 - Jim Brosnahan
+**
+** This demonstration source is distributed in the hope it will be useful,
+** BUT WITHOUT ANY WARRANTY.
+**
+** wxWidgets retains their respective CopyRights
+** https://www.wxwidgets.org/
+** 
+*/
 
+#include <wx/wxprec.h>
 
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
@@ -178,11 +186,21 @@ void MyFrame::CryptButton(wxCommandEvent& event)
     if ((inputFile.empty()) || (outputFile.empty()))
         return;
 
+    int mode = m_combo->GetSelection();
     wxString pwd;
     bool res = PasswordEntry(wxT("Enter Passphrase"), pwd);
 
-    //TODO when sel == encrypt, request passphrase 2nd time for verification
-    //wxLogMessage("PE result: %d, PP: %s", res, pwd);
+    if (mode == 0) {
+
+        //encryption, verify both passphrases match
+        wxString pwd2;
+        bool res2 = PasswordEntry(wxT("Enter Again"), pwd2);
+
+        if (!((res) && (res2) && (pwd.Cmp(pwd2) == 0))) {
+            wxLogMessage(wxT("Passphrases do no match"));
+            res = false;
+        }
+    }
 
     if (res) {
 
@@ -190,10 +208,8 @@ void MyFrame::CryptButton(wxCommandEvent& event)
         Crypto* C = new Crypto();
         std::string pp = std::string(pwd.c_str());
 
-        if (m_combo->GetSelection() == 0) //encrypt
-            result = C->Encrypt(inputFile, outputFile, pp);
-        else
-            result = C->Decrypt(inputFile, outputFile, pp);
+        result = C->Process( (mode == 0) ? Modes::ENCRYPT:Modes::DECRYPT,
+            inputFile, outputFile, pp);
 
         delete C;
     }
@@ -201,14 +217,8 @@ void MyFrame::CryptButton(wxCommandEvent& event)
 
 bool MyFrame::browseFileName(const wxString prompt, std::string& file)
 {
-    wxFileDialog dialog
-    (
-        this,
-        prompt,
-        wxEmptyString,
-        wxEmptyString);
+    wxFileDialog dialog (this, prompt, wxEmptyString, wxEmptyString );
 
-    //dialog.SetExtraControlCreator()
     dialog.CenterOnScreen();
     dialog.SetDirectory(wxGetHomeDir());
 

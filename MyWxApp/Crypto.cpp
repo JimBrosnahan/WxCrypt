@@ -1,11 +1,18 @@
 /*
-** Crytpo adapter layer
+** Copyright (c) 2020 - Jim Brosnahan
+** Crytpo adapter interface to AES CFB functions
+**
+** This demonstration source is distributed in the hope it will be useful,
+** BUT WITHOUT ANY WARRANTY.
+**
+** CryptoPP retain their respective CopyRights
+** https://www.cryptopp.com/
+**
 */
 
 #include <iostream>
 #include <fstream>
 
-#include "Crypto.h"
 
 // include from CryptoPP
 #include "aes.h"
@@ -13,14 +20,13 @@
 #include "filters.h"
 #include "files.h"
 
+#include "Crypto.h"
+
 // CryptoPP key and IV context
 class CryptoPP_key_iv
 {
 public:
-    //Key and IV setup
-    //AES encryption uses a secret key of a variable length (128-bit, 196-bit or 256-   
-    //bit). This key is secretly exchanged between two parties before communication   
-    //begins. DEFAULT_KEYLENGTH= 16 bytes
+    //Key and IV setup using Key and block length of 16 bytes
     CryptoPP::byte key[CryptoPP::AES::DEFAULT_KEYLENGTH], iv[CryptoPP::AES::BLOCKSIZE];
 
     CryptoPP_key_iv()
@@ -30,7 +36,7 @@ public:
     }
 
     //convert passphrase to AES fixed key
-    //TODO - hash pp
+    //TODO - sha1 hash pp
     const int make_Key(string pp)
     {
         int len = pp.length();
@@ -58,53 +64,12 @@ unsigned Crypto::getFileLength(const char* filename)
 /*
 ** using https://www.cryptopp.com/wiki/Advanced_Encryption_Standard
 */
-int Crypto::Encrypt(string infilename, string outfilename, string passphrase)
+unsigned Crypto::Process(Modes mode, string infilename, string outfilename, string passphrase)
 {
     CryptoPP_key_iv KIV;
     KIV.make_Key(passphrase);
     unsigned fileLength = getFileLength(infilename.c_str());
-
-    // open input source
-    ifstream inFile(infilename.c_str(), ios::in | ios::binary);
-
-    // create output sink
-    ofstream outFile(outfilename.c_str(), ios::out | ios::binary);
-
-    // check everything is valid
-    if ((fileLength > 0) && (inFile) && (outFile))
-    {
-        // allocate work buffers
-        CryptoPP::byte* inBuf = new CryptoPP::byte[fileLength];
-        CryptoPP::byte* outBuf = new CryptoPP::byte[fileLength];
-
-        // slurp
-        inFile.read( (char*)inBuf, fileLength);
-
-        //
-        // Create Cipher 
-        // <name_space>::<class>::<Member function>
-        //
-
-        CryptoPP::CFB_Mode<CryptoPP::AES>::Encryption cfbEncryption(KIV.key, KIV.key_Size, KIV.iv);
-        cfbEncryption.ProcessData(outBuf, inBuf, fileLength);
-        outFile.write( (const char*)outBuf, fileLength);
-
-        //close fstreams
-        inFile.close();
-        outFile.close();
-
-        delete[] outBuf;
-        delete[] inBuf;
-    }
-
-    return 0;
-}
-
-int Crypto::Decrypt(string infilename, string outfilename, string passphrase)
-{
-    CryptoPP_key_iv KIV;
-    KIV.make_Key(passphrase);
-    unsigned fileLength = getFileLength(infilename.c_str());
+    unsigned result = 0;
 
     // open input source
     ifstream inFile(infilename.c_str(), ios::in | ios::binary);
@@ -127,8 +92,16 @@ int Crypto::Decrypt(string infilename, string outfilename, string passphrase)
         // <name_space>::<class>::<Member function>
         //
 
-        CryptoPP::CFB_Mode<CryptoPP::AES>::Decryption cfbDecryption(KIV.key, KIV.key_Size, KIV.iv);
-        cfbDecryption.ProcessData(outBuf, inBuf, fileLength);
+        if (mode == Modes::ENCRYPT) {
+            CryptoPP::CFB_Mode<CryptoPP::AES>::Encryption cfbEncryption(KIV.key, KIV.key_Size, KIV.iv);
+            cfbEncryption.ProcessData(outBuf, inBuf, fileLength);
+        }
+        else {
+            CryptoPP::CFB_Mode<CryptoPP::AES>::Decryption cfbDecryption(KIV.key, KIV.key_Size, KIV.iv);
+            cfbDecryption.ProcessData(outBuf, inBuf, fileLength);
+        }
+
+        // write result
         outFile.write((const char*)outBuf, fileLength);
 
         //close fstreams
@@ -137,7 +110,8 @@ int Crypto::Decrypt(string infilename, string outfilename, string passphrase)
 
         delete[] outBuf;
         delete[] inBuf;
+        result = fileLength;
     }
 
-    return 0;
+    return result;
 }
