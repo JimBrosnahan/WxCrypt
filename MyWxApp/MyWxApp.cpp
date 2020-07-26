@@ -138,12 +138,7 @@ void MyFrame::OnExit(wxCommandEvent& event)
 
 void MyFrame::OnAbout(wxCommandEvent& event)
 {
-    int sel = m_combo->GetSelection();
-    std::string str = "select: ";
-
-    str += std::to_string(sel);
-
-    wxMessageBox(str,
+    wxMessageBox(wxT("WxWidgets + CryptoPP combined"),
         "About", wxOK | wxICON_INFORMATION);
 }
 

@@ -23,11 +23,11 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\NOTES.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="Crypto.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\README.md" />
   </ItemGroup>
 </Project>
