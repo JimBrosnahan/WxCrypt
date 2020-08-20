@@ -21,16 +21,16 @@
 //
 // class declarations
 //
-class MyApp : public wxApp
+class Wxcrypt : public wxApp
 {
 public:
     virtual bool OnInit();
 };
 
-class MyFrame : public wxFrame
+class AppFrame : public wxFrame
 {
 public:
-    MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
+    AppFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
 
     wxComboBox* m_combo;
     wxTextCtrl* m_infileText;
@@ -60,25 +60,25 @@ enum
     ID_CRYPTBUTTON
 };
 
-//MyFrame events
-wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
-EVT_MENU(ID_FILEINPUT, MyFrame::FileInput)
-EVT_MENU(ID_FILEOUTPUT, MyFrame::FileOutput)
-EVT_MENU(ID_CRYPTBUTTON, MyFrame::CryptButton)
-EVT_BUTTON(ID_CRYPTBUTTON, MyFrame::CryptButton)
-EVT_MENU(wxID_EXIT, MyFrame::OnExit)
-EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
+//AppFrame events
+wxBEGIN_EVENT_TABLE(AppFrame, wxFrame)
+EVT_MENU(ID_FILEINPUT, AppFrame::FileInput)
+EVT_MENU(ID_FILEOUTPUT, AppFrame::FileOutput)
+EVT_MENU(ID_CRYPTBUTTON, AppFrame::CryptButton)
+EVT_BUTTON(ID_CRYPTBUTTON, AppFrame::CryptButton)
+EVT_MENU(wxID_EXIT, AppFrame::OnExit)
+EVT_MENU(wxID_ABOUT, AppFrame::OnAbout)
 wxEND_EVENT_TABLE()
 
 
-wxIMPLEMENT_APP(MyApp);
-bool MyApp::OnInit()
+wxIMPLEMENT_APP(Wxcrypt);
+bool Wxcrypt::OnInit()
 {
     if (!wxApp::OnInit())
         return false;
 
     // create main frame
-    MyFrame* frame = new MyFrame("MyWxApp", wxPoint(50, 50), wxSize(450, 240));
+    AppFrame* frame = new AppFrame("Wxcrypt", wxPoint(50, 50), wxSize(450, 240));
 
     frame->Show(true);
     return true;
@@ -91,7 +91,7 @@ static const wxString choices[] =
 };
 
 
-MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
+AppFrame::AppFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     : wxFrame(NULL, wxID_ANY, title, pos, size)
 {
     //dropdown menubar
@@ -131,18 +131,18 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 }
 
-void MyFrame::OnExit(wxCommandEvent& event)
+void AppFrame::OnExit(wxCommandEvent& event)
 {
     Close(true);
 }
 
-void MyFrame::OnAbout(wxCommandEvent& event)
+void AppFrame::OnAbout(wxCommandEvent& event)
 {
-    wxMessageBox(wxT("WxWidgets + CryptoPP combined"),
+    wxMessageBox(wxT("Wxcrypt = WxWidgets + CryptoPP combined\nCopyright (c) 2020 - Jim Brosnahan"),
         "About", wxOK | wxICON_INFORMATION);
 }
 
-void MyFrame::FileInput(wxCommandEvent& event)
+void AppFrame::FileInput(wxCommandEvent& event)
 {
     browseFileName(wxT("Input File"), inputFile);
 
@@ -156,7 +156,7 @@ void MyFrame::FileInput(wxCommandEvent& event)
     //wxLogMessage(str.c_str());
 }
 
-void MyFrame::FileOutput(wxCommandEvent& event)
+void AppFrame::FileOutput(wxCommandEvent& event)
 {
     browseFileName(wxT("Output File"), outputFile);
 
@@ -171,7 +171,7 @@ void MyFrame::FileOutput(wxCommandEvent& event)
 }
 
 
-void MyFrame::CryptButton(wxCommandEvent& event)
+void AppFrame::CryptButton(wxCommandEvent& event)
 {
     //reread textbox for now, add event for filename textbox change
     inputFile = m_infileText->GetLineText(0);
@@ -210,7 +210,7 @@ void MyFrame::CryptButton(wxCommandEvent& event)
     }
 }
 
-bool MyFrame::browseFileName(const wxString prompt, std::string& file)
+bool AppFrame::browseFileName(const wxString prompt, std::string& file)
 {
     wxFileDialog dialog (this, prompt, wxEmptyString, wxEmptyString );
 
@@ -225,7 +225,7 @@ bool MyFrame::browseFileName(const wxString prompt, std::string& file)
     return true;
 }
 
-bool MyFrame::PasswordEntry(const wxString prompt, wxString& pw)
+bool AppFrame::PasswordEntry(const wxString prompt, wxString& pw)
 {
     wxString pwd = wxGetPasswordFromUser(prompt);
 
